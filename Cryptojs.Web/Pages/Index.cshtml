@@ -1,0 +1,99 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+@section scripts
+{
+    @*<script src="~/lib/crypto-js/aes.js"></script>*@
+
+    @*https://cdnjs.com/libraries/crypto-js*@
+    <script src="~/lib/crypto-js/crypto-js.min.js"></script>
+    <script src="~/lib/crypto-js/aes.min.js"></script>
+    <script>
+        function get_encrypted_text(plainText) {
+
+            if (!plainText || plainText.len == 0)
+                return;
+
+            var key = CryptoJS.enc.Utf8.parse('8080808080808080');
+            var iv = CryptoJS.enc.Utf8.parse('8080808080808080');
+
+            var options = { keySize: 128 / 8, iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 };
+
+            var utf8PlainText = CryptoJS.enc.Utf8.parse(plainText);
+
+            var encryptedText = CryptoJS.AES.encrypt(utf8PlainText, key, options);
+
+            console.log('plainText', plainText, 'encryptedText', encryptedText);
+
+            return encryptedText;
+        }
+
+        function btnSubmitOnclick() {
+            var username = $("#Model_UserName").val();
+            var username_encrypted = get_encrypted_text(username);
+
+            var $username_encrypted = $("#Model_UserNameEncrypted");
+            $username_encrypted.val(username_encrypted);
+
+            console.log('username', username, 'username_encrypted', username_encrypted, '$username_encrypted', $username_encrypted);
+
+
+            var password = $("#Model_Password").val();
+            var password_encrypted = get_encrypted_text(password);
+            var $password_encrypted = $("#Model_PasswordEncrypted");
+            $password_encrypted.val(password_encrypted);
+            console.log('password', password, 'password_encrypted', password_encrypted, '$password_encrypted', $password_encrypted);
+
+
+            var note = $("#Model_Note").val();
+            var note_encrypted = get_encrypted_text(note);
+            var $note_encrypted = $("#Model_NoteEncrypted");
+            $note_encrypted.val(note_encrypted);
+            console.log('note', note, 'note_encrypted', note_encrypted, '$note_encrypted', $note_encrypted);
+
+            $("form")[0].submit();
+        };
+
+        $("#btnSubmit").click(btnSubmitOnclick);
+    </script>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Register @ViewData["result"]</legend>
+        <dl>
+            <dt>
+                @Html.LabelFor(m => m.Model.UserName)
+            </dt>
+            <dd>
+                @Html.TextBoxFor(m => m.Model.UserName)
+                @Html.HiddenFor(m => m.Model.UserNameEncrypted)
+                @Html.ValidationMessageFor(m => m.Model.UserName)
+            </dd>
+            <dt>
+                @Html.LabelFor(m => m.Model.Password)
+            </dt>
+            <dd>
+                @Html.TextBoxFor(m => m.Model.Password)
+                @Html.HiddenFor(m => m.Model.PasswordEncrypted)
+                @Html.ValidationMessageFor(m => m.Model.Password)
+            </dd>
+            <dt>
+                @Html.LabelFor(m => m.Model.Note)
+            </dt>
+            <dd>
+                @Html.TextBoxFor(m => m.Model.Note)
+                @Html.HiddenFor(m => m.Model.NoteEncrypted)
+                @Html.ValidationMessageFor(m => m.Model.Note)
+            </dd>
+        </dl>
+        <input type="button" id="btnSubmit" value="Save" />
+    </fieldset>
+}
